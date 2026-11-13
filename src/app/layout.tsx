@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ToastProvider } from "@/components/toast-provider";
 import { ResponsiveNav } from "@/components/nav/responsive-nav";
+import { MotionProvider } from "@/components/motion/motion-provider";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -31,10 +32,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <ToastProvider>
-            <ResponsiveNav />
-            {children}
-          </ToastProvider>
+          <MotionProvider>
+            <ToastProvider>
+              <ResponsiveNav />
+              {children}
+            </ToastProvider>
+          </MotionProvider>
         </ThemeProvider>
       </body>
     </html>

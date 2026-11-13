@@ -37,7 +37,7 @@ export function ResponsiveNav() {
           <Link
             key={href}
             href={href}
-            className="flex min-w-16 flex-col items-center gap-1 rounded-xl px-3 py-2 text-xs font-medium text-slate-500 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-blue-300 md:flex-row md:gap-2 md:rounded-full md:px-4 md:text-sm"
+            className="motion-safe:active:scale-[0.96] motion-safe:transition-transform flex min-w-16 flex-col items-center gap-1 rounded-xl px-3 py-2 text-xs font-medium text-slate-500 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-blue-300 md:flex-row md:gap-2 md:rounded-full md:px-4 md:text-sm"
           >
             <Icon aria-hidden="true" size={18} strokeWidth={2} />
             <span>{label}</span>
@@ -47,7 +47,7 @@ export function ResponsiveNav() {
           type="button"
           aria-label={isDark ? "Gunakan mode terang" : "Gunakan mode gelap"}
           onClick={() => setTheme(isDark ? "light" : "dark")}
-          className="flex min-w-16 flex-col items-center gap-1 rounded-xl px-3 py-2 text-xs font-medium text-slate-500 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-blue-300 md:flex-row md:gap-2 md:rounded-full md:px-4 md:text-sm"
+          className="motion-safe:active:scale-[0.96] motion-safe:transition-transform flex min-w-16 flex-col items-center gap-1 rounded-xl px-3 py-2 text-xs font-medium text-slate-500 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-blue-300 md:flex-row md:gap-2 md:rounded-full md:px-4 md:text-sm"
         >
           {isDark ? (
             <Sun aria-hidden="true" size={18} strokeWidth={2} />

@@ -83,7 +83,7 @@ export function ApplicationFilters({
         {hasFilters && (
           <Link
             href={pathname}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-muted transition-colors hover:bg-slate-50 hover:text-foreground dark:border-slate-700 dark:hover:bg-slate-800"
+            className="motion-safe:active:scale-[0.98] motion-safe:transition-transform inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-muted transition-colors hover:bg-slate-50 hover:text-foreground dark:border-slate-700 dark:hover:bg-slate-800"
           >
             <X size={16} />
             Atur ulang

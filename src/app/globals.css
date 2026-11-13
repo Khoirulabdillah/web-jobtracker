@@ -38,3 +38,11 @@ body {
   color: var(--foreground);
   font-family: var(--font-poppins), sans-serif;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+}

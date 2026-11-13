@@ -9,6 +9,7 @@ import {
   applicationStatuses,
   type ApplicationStatus,
 } from "@/lib/validators";
+import { Reveal, StaggerGroup, StaggerItem } from "@/components/motion/reveal";
 
 export const instant = false;
 
@@ -44,7 +45,7 @@ export default async function ApplicationsPage({
           </div>
           <Link
             href="/lamaran/baru"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary-hover"
+            className="motion-safe:active:scale-[0.98] motion-safe:transition-transform inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary-hover"
           >
             <Plus size={17} />
             Tambah lamaran
@@ -52,7 +53,9 @@ export default async function ApplicationsPage({
         </div>
 
         {applications !== null && (
-          <ApplicationFilters status={status} query={query} />
+          <Reveal>
+            <ApplicationFilters status={status} query={query} />
+          </Reveal>
         )}
 
         {applications === null ? (
@@ -70,18 +73,20 @@ export default async function ApplicationsPage({
             {hasFilters && (
               <Link
                 href="/lamaran"
-                className="mt-5 inline-flex rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover"
+                className="motion-safe:active:scale-[0.98] motion-safe:transition-transform mt-5 inline-flex rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover"
               >
                 Atur ulang filter
               </Link>
             )}
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2">
+          <StaggerGroup className="grid gap-4 md:grid-cols-2">
             {applications.map((application) => (
-              <ApplicationCard key={application.id} application={application} />
+              <StaggerItem key={application.id}>
+                <ApplicationCard application={application} />
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerGroup>
         )}
       </div>
     </main>

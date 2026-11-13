@@ -32,7 +32,7 @@ export function DeleteButton({ id }: { id: string }) {
       <button
         type="button"
         onClick={() => dialogRef.current?.showModal()}
-        className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 dark:border-red-900/70 dark:text-red-400 dark:hover:bg-red-950/40"
+        className="motion-safe:active:scale-[0.98] motion-safe:transition-transform inline-flex items-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 dark:border-red-900/70 dark:text-red-400 dark:hover:bg-red-950/40"
       >
         <Trash2 size={16} />
         Hapus
@@ -50,7 +50,7 @@ export function DeleteButton({ id }: { id: string }) {
             <button
               type="button"
               onClick={() => dialogRef.current?.close()}
-              className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold dark:border-slate-700"
+              className="motion-safe:active:scale-[0.98] motion-safe:transition-transform rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold dark:border-slate-700"
             >
               Batal
             </button>
@@ -58,7 +58,7 @@ export function DeleteButton({ id }: { id: string }) {
               type="button"
               disabled={isPending}
               onClick={handleDelete}
-              className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
+              className="motion-safe:active:scale-[0.98] motion-safe:transition-transform inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
             >
               {isPending && <LoaderCircle className="animate-spin" size={16} />}
               Hapus permanen

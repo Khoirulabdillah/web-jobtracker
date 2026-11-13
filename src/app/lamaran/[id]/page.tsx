@@ -67,7 +67,7 @@ export default async function ApplicationDetailPage({
             <div className="flex gap-2">
               <Link
                 href={`/lamaran/${application.id}/ubah`}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold dark:border-slate-700"
+                className="motion-safe:active:scale-[0.98] motion-safe:transition-transform inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold dark:border-slate-700"
               >
                 <Pencil size={16} />
                 Ubah
@@ -119,7 +119,7 @@ export default async function ApplicationDetailPage({
                 href={googleCalendarUrl(application)}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary-hover"
+                className="motion-safe:active:scale-[0.98] motion-safe:transition-transform inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary-hover"
               >
                 <CalendarPlus size={17} />
                 Tambah ke Google Calendar
@@ -127,7 +127,7 @@ export default async function ApplicationDetailPage({
               <a
                 href={`/api/ics/${application.id}`}
                 download
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold dark:border-slate-700"
+                className="motion-safe:active:scale-[0.98] motion-safe:transition-transform inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold dark:border-slate-700"
               >
                 <Download size={17} />
                 Unduh .ics

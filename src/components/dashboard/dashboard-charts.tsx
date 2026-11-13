@@ -1,5 +1,6 @@
 "use client";
 
+import { useReducedMotion } from "framer-motion";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { applicationStatuses, statusLabels } from "@/lib/validators";
 
@@ -27,6 +28,8 @@ export function DashboardCharts({
   statuses: StatusData[];
   monthly: MonthlyData[];
 }) {
+  const shouldReduceMotion = useReducedMotion();
+  const animationDuration = shouldReduceMotion ? 0 : 700;
   const statusChartData = statuses.map((item) => ({
     ...item,
     name: statusLabels[item.status],
@@ -53,7 +56,7 @@ export function DashboardCharts({
                 innerRadius={62}
                 outerRadius={92}
                 paddingAngle={3}
-                animationDuration={700}
+                animationDuration={animationDuration}
               >
                 {statusChartData.map((entry) => (
                   <Cell key={entry.status} fill={entry.fill} />
@@ -82,7 +85,13 @@ export function DashboardCharts({
               <XAxis dataKey="label" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
               <YAxis allowDecimals={false} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
               <Tooltip />
-              <Bar dataKey="count" name="Lamaran" fill="#3B82F6" radius={[6, 6, 0, 0]} animationDuration={700} />
+              <Bar
+                dataKey="count"
+                name="Lamaran"
+                fill="#3B82F6"
+                radius={[6, 6, 0, 0]}
+                animationDuration={animationDuration}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>

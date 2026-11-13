@@ -15,7 +15,7 @@ import {
 
 export function ApplicationCard({ application }: { application: Application }) {
   return (
-    <article className="rounded-2xl border border-slate-200 bg-surface p-5 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700">
+    <article className="motion-safe:active:scale-[0.99] motion-safe:transition-all motion-safe:duration-300 rounded-2xl border border-slate-200 bg-surface p-5 shadow-sm motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md dark:border-slate-700">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="font-semibold">{application.position}</h2>

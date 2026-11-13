@@ -9,6 +9,7 @@ import { DashboardCharts } from "@/components/dashboard/dashboard-charts";
 import { RecentApplications } from "@/components/dashboard/recent-applications";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { UpcomingBanner } from "@/components/dashboard/upcoming-banner";
+import { Reveal, StaggerGroup, StaggerItem } from "@/components/motion/reveal";
 import { isDatabaseConfigured } from "@/db";
 import { applicationStatuses, statusLabels } from "@/lib/validators";
 
@@ -16,7 +17,8 @@ export default async function Home() {
   return (
     <main className="min-h-screen px-5 pb-32 pt-8 md:px-8 md:pb-12 md:pt-28">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
-        <section className="relative overflow-hidden rounded-3xl bg-navy px-6 py-10 text-white shadow-xl shadow-blue-950/10 sm:px-10 sm:py-14">
+        <Reveal className="min-w-0">
+          <section className="relative overflow-hidden rounded-3xl bg-navy px-6 py-10 text-white shadow-xl shadow-blue-950/10 sm:px-10 sm:py-14">
           <div className="relative z-10 max-w-2xl">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-sm text-blue-100">
               <Sparkles size={16} aria-hidden="true" />
@@ -31,7 +33,7 @@ export default async function Home() {
             </p>
             <Link
               href="/lamaran/baru"
-              className="mt-8 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 font-semibold transition-colors hover:bg-primary-hover"
+              className="motion-safe:active:scale-[0.98] motion-safe:transition-transform mt-8 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 font-semibold transition-colors hover:bg-primary-hover"
             >
               Tambah lamaran
               <ArrowRight size={18} aria-hidden="true" />
@@ -42,7 +44,8 @@ export default async function Home() {
             className="absolute -bottom-12 -right-8 size-56 rotate-12 text-white/5 sm:size-72"
             strokeWidth={1}
           />
-        </section>
+          </section>
+        </Reveal>
 
         <Suspense fallback={<DashboardLoading />}>
           <DashboardData />
@@ -90,27 +93,36 @@ function DashboardContent({
 
   return (
     <>
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard label="Total lamaran" value={data.total} accent="bg-primary" />
+      <StaggerGroup className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <StaggerItem>
+          <StatCard label="Total lamaran" value={data.total} accent="bg-primary" />
+        </StaggerItem>
         {applicationStatuses.map((status) => (
-          <StatCard
-            key={status}
-            label={statusLabels[status]}
-            value={counts[status] ?? 0}
-            accent={statusAccent[status]}
-          />
+          <StaggerItem key={status}>
+            <StatCard
+              label={statusLabels[status]}
+              value={counts[status] ?? 0}
+              accent={statusAccent[status]}
+            />
+          </StaggerItem>
         ))}
-      </section>
-      <DashboardCharts
-        statuses={applicationStatuses.map((status) => ({
-          status,
-          count: counts[status] ?? 0,
-        }))}
-        monthly={monthly}
-      />
+      </StaggerGroup>
+      <Reveal>
+        <DashboardCharts
+          statuses={applicationStatuses.map((status) => ({
+            status,
+            count: counts[status] ?? 0,
+          }))}
+          monthly={monthly}
+        />
+      </Reveal>
       <div className="grid gap-6 lg:grid-cols-2">
-        <RecentApplications applications={data.recentApplications} />
-        <UpcomingBanner application={data.upcoming} />
+        <Reveal className="min-w-0">
+          <RecentApplications applications={data.recentApplications} />
+        </Reveal>
+        <Reveal className="min-w-0" delay={0.06}>
+          <UpcomingBanner application={data.upcoming} />
+        </Reveal>
       </div>
     </>
   );
@@ -129,7 +141,7 @@ function EmptyDashboard() {
       </p>
       <Link
         href="/lamaran/baru"
-        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:bg-primary-hover"
+        className="motion-safe:active:scale-[0.98] motion-safe:transition-transform mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:bg-primary-hover"
       >
         <Plus size={17} />
         Tambah lamaran pertama
