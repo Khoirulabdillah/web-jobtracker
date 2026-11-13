@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, LoaderCircle, Save } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useEffect, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import {
   applicationSchema,
@@ -37,6 +37,7 @@ export function ApplicationForm({
     register,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors },
   } = useForm<ApplicationFormValues>({
     resolver: zodResolver(applicationSchema),
@@ -44,12 +45,18 @@ export function ApplicationForm({
       company: "",
       position: "",
       jobUrl: "",
-      appliedAt: getTodayJakarta(),
+      appliedAt: "",
       reminderAt: "",
       status: "dikirim",
       notes: "",
     },
   });
+
+  useEffect(() => {
+    if (!defaultValues) {
+      setValue("appliedAt", getTodayJakarta());
+    }
+  }, [defaultValues, setValue]);
 
   const onSubmit = (values: ApplicationFormValues) => {
     startTransition(async () => {

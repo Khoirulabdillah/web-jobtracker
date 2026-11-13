@@ -1,6 +1,8 @@
 import {
   ArrowLeft,
   CalendarClock,
+  CalendarPlus,
+  Download,
   ExternalLink,
   Pencil,
 } from "lucide-react";
@@ -16,6 +18,7 @@ import {
   statusLabels,
   statusStyles,
 } from "@/lib/validators";
+import { googleCalendarUrl } from "@/lib/calendar";
 
 export const instant = false;
 
@@ -109,6 +112,28 @@ export default async function ApplicationDetailPage({
               </div>
             )}
           </dl>
+
+          {application.reminderAt && (
+            <div className="mt-8 flex flex-col gap-3 border-t border-slate-200 pt-6 dark:border-slate-700 sm:flex-row">
+              <a
+                href={googleCalendarUrl(application)}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary-hover"
+              >
+                <CalendarPlus size={17} />
+                Tambah ke Google Calendar
+              </a>
+              <a
+                href={`/api/ics/${application.id}`}
+                download
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold dark:border-slate-700"
+              >
+                <Download size={17} />
+                Unduh .ics
+              </a>
+            </div>
+          )}
 
           {application.notes && (
             <div className="mt-8 border-t border-slate-200 pt-6 dark:border-slate-700">

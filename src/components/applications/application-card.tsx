@@ -1,4 +1,9 @@
-import { ArrowRight, CalendarClock, ExternalLink } from "lucide-react";
+import {
+  ArrowRight,
+  CalendarClock,
+  CalendarDays,
+  ExternalLink,
+} from "lucide-react";
 import Link from "next/link";
 import type { Application } from "@/db/schema";
 import {
@@ -25,10 +30,21 @@ export function ApplicationCard({ application }: { application: Application }) {
       <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted">
         <span>Dilamar {formatDate(application.appliedAt)}</span>
         {application.reminderAt && (
-          <span className="inline-flex items-center gap-1">
-            <CalendarClock size={14} />
-            {formatReminder(application.reminderAt)}
-          </span>
+          <>
+            <span className="inline-flex items-center gap-1">
+              <CalendarClock size={14} />
+              {formatReminder(application.reminderAt)}
+            </span>
+            <a
+              href={`/api/ics/${application.id}`}
+              download
+              aria-label="Unduh pengingat kalender"
+              title="Unduh pengingat kalender"
+              className="inline-flex items-center rounded-md p-1 text-primary transition-colors hover:bg-primary-muted"
+            >
+              <CalendarDays size={16} />
+            </a>
+          </>
         )}
         {application.jobUrl && (
           <a

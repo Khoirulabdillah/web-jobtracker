@@ -6,7 +6,6 @@ import { DatabaseNotice } from "@/components/database-notice";
 import { getApplicationById } from "@/actions/applications";
 import { isDatabaseConfigured } from "@/db";
 import { toJakartaInputValue } from "@/lib/datetime";
-import { formatDateTimeLocal } from "@/lib/validators";
 
 export const instant = false;
 
