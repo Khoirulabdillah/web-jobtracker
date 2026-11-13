@@ -17,16 +17,13 @@ import {
   updateApplication,
 } from "@/actions/applications";
 import { useToast } from "@/components/toast-provider";
+import { getTodayJakarta } from "@/lib/datetime";
 
 type ApplicationFormProps = {
   mode: "create" | "edit";
   applicationId?: string;
   defaultValues?: ApplicationFormValues;
 };
-
-const today = new Intl.DateTimeFormat("sv-SE", {
-  timeZone: "Asia/Jakarta",
-}).format(new Date());
 
 export function ApplicationForm({
   mode,
@@ -47,7 +44,7 @@ export function ApplicationForm({
       company: "",
       position: "",
       jobUrl: "",
-      appliedAt: today,
+      appliedAt: getTodayJakarta(),
       reminderAt: "",
       status: "dikirim",
       notes: "",

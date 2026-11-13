@@ -5,6 +5,7 @@ import { ApplicationForm } from "@/components/applications/application-form";
 import { DatabaseNotice } from "@/components/database-notice";
 import { getApplicationById } from "@/actions/applications";
 import { isDatabaseConfigured } from "@/db";
+import { toJakartaInputValue } from "@/lib/datetime";
 import { formatDateTimeLocal } from "@/lib/validators";
 
 export const instant = false;
@@ -52,7 +53,7 @@ export default async function EditApplicationPage({
             position: application.position,
             jobUrl: application.jobUrl ?? "",
             appliedAt: application.appliedAt,
-            reminderAt: formatDateTimeLocal(application.reminderAt),
+            reminderAt: toJakartaInputValue(application.reminderAt),
             status: application.status,
             notes: application.notes ?? "",
           }}

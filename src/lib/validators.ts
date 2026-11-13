@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { formatJakarta } from "@/lib/datetime";
 
 export const applicationStatuses = [
   "dikirim",
@@ -7,6 +8,8 @@ export const applicationStatuses = [
   "diterima",
   "ditolak",
 ] as const;
+
+export type ApplicationStatus = (typeof applicationStatuses)[number];
 
 export const statusLabels: Record<(typeof applicationStatuses)[number], string> =
   {
@@ -83,9 +86,5 @@ export function formatDate(value: string) {
 }
 
 export function formatReminder(value: Date) {
-  return new Intl.DateTimeFormat("id-ID", {
-    dateStyle: "long",
-    timeStyle: "short",
-    timeZone: "Asia/Jakarta",
-  }).format(value);
+  return formatJakarta(value);
 }

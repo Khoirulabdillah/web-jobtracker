@@ -1,9 +1,24 @@
 "use server";
 
-import { and, count, desc, eq, gt, gte, inArray, sql } from "drizzle-orm";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  gt,
+  gte,
+  ilike,
+  inArray,
+  or,
+  sql,
+} from "drizzle-orm";
 import { format, startOfMonth, subMonths } from "date-fns";
 import { revalidatePath } from "next/cache";
-import { applicationSchema, type ApplicationFormValues } from "@/lib/validators";
+import {
+  applicationSchema,
+  type ApplicationFormValues,
+  type ApplicationStatus,
+} from "@/lib/validators";
 import { getDb } from "@/db";
 import { applications } from "@/db/schema";
 
@@ -14,7 +29,9 @@ type ActionResult =
 function parseReminderAt(value: string) {
   if (!value) return null;
 
-  const parsed = new Date(`${value}:00+07:00`);
+  // datetime-local normalnya "YYYY-MM-DDTHH:mm"; tambahkan detik hanya jika belum ada
+  const normalized = value.length === 16 ? `${value}:00` : value.slice(0, 19);
+  const parsed = new Date(`${normalized}+07:00`);
   if (Number.isNaN(parsed.getTime())) {
     throw new Error("Tanggal pengingat tidak valid.");
   }
@@ -110,14 +127,46 @@ export async function deleteApplication(id: string): Promise<ActionResult> {
   }
 }
 
-export async function getApplications() {
+function escapeLike(value: string) {
+  return value.replace(/[\\%_]/g, "\\$&");
+}
+
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export async function getApplications({
+  status,
+  query,
+}: {
+  status?: ApplicationStatus;
+  query?: string;
+} = {}) {
+  const conditions = [];
+
+  if (status) {
+    conditions.push(eq(applications.status, status));
+  }
+
+  if (query) {
+    const searchPattern = `%${escapeLike(query)}%`;
+    conditions.push(
+      or(
+        ilike(applications.company, searchPattern),
+        ilike(applications.position, searchPattern),
+      ),
+    );
+  }
+
   return getDb()
     .select()
     .from(applications)
+    .where(conditions.length ? and(...conditions) : undefined)
     .orderBy(desc(applications.appliedAt), desc(applications.createdAt));
 }
 
 export async function getApplicationById(id: string) {
+  if (!UUID_PATTERN.test(id)) return undefined;
+
   const rows = await getDb()
     .select()
     .from(applications)
