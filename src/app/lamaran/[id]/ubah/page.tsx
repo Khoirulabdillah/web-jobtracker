@@ -7,6 +7,8 @@ import { getApplicationById } from "@/actions/applications";
 import { isDatabaseConfigured } from "@/db";
 import { formatDateTimeLocal } from "@/lib/validators";
 
+export const instant = false;
+
 export default async function EditApplicationPage({
   params,
 }: {

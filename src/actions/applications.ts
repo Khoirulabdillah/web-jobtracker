@@ -1,6 +1,7 @@
 "use server";
 
-import { eq, desc } from "drizzle-orm";
+import { and, count, desc, eq, gt, gte, inArray, sql } from "drizzle-orm";
+import { format, startOfMonth, subMonths } from "date-fns";
 import { revalidatePath } from "next/cache";
 import { applicationSchema, type ApplicationFormValues } from "@/lib/validators";
 import { getDb } from "@/db";
@@ -123,4 +124,58 @@ export async function getApplicationById(id: string) {
     .where(eq(applications.id, id))
     .limit(1);
   return rows[0];
+}
+
+export async function getDashboardData() {
+  const db = getDb();
+  const monthStart = format(
+    startOfMonth(subMonths(new Date(), 11)),
+    "yyyy-MM-dd",
+  );
+  const monthExpression = sql<string>`to_char(date_trunc('month', ${applications.appliedAt}), 'YYYY-MM')`;
+
+  const [totalRows, statusRows, monthlyRows, recentApplications, upcomingRows] =
+    await Promise.all([
+      db.select({ count: count() }).from(applications),
+      db
+        .select({ status: applications.status, count: count() })
+        .from(applications)
+        .groupBy(applications.status),
+      db
+        .select({ month: monthExpression, count: count() })
+        .from(applications)
+        .where(gte(applications.appliedAt, monthStart))
+        .groupBy(monthExpression)
+        .orderBy(monthExpression),
+      db
+        .select()
+        .from(applications)
+        .orderBy(desc(applications.appliedAt), desc(applications.createdAt))
+        .limit(5),
+      db
+        .select()
+        .from(applications)
+        .where(
+          and(
+            gt(applications.reminderAt, new Date()),
+            inArray(applications.status, ["psikotes", "wawancara"]),
+          ),
+        )
+        .orderBy(applications.reminderAt)
+        .limit(1),
+    ]);
+
+  return {
+    total: Number(totalRows[0]?.count ?? 0),
+    statuses: statusRows.map((row) => ({
+      status: row.status,
+      count: Number(row.count),
+    })),
+    monthly: monthlyRows.map((row) => ({
+      month: row.month,
+      count: Number(row.count),
+    })),
+    recentApplications,
+    upcoming: upcomingRows[0] ?? null,
+  };
 }

@@ -17,6 +17,8 @@ import {
   statusStyles,
 } from "@/lib/validators";
 
+export const instant = false;
+
 export default async function ApplicationDetailPage({
   params,
 }: {

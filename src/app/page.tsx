@@ -1,7 +1,18 @@
-import { ArrowRight, BriefcaseBusiness, Sparkles } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, Plus, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { connection } from "next/server";
+import { Suspense } from "react";
+import { format, startOfMonth, subMonths } from "date-fns";
+import { getDashboardData } from "@/actions/applications";
+import { DatabaseNotice } from "@/components/database-notice";
+import { DashboardCharts } from "@/components/dashboard/dashboard-charts";
+import { RecentApplications } from "@/components/dashboard/recent-applications";
+import { StatCard } from "@/components/dashboard/stat-card";
+import { UpcomingBanner } from "@/components/dashboard/upcoming-banner";
+import { isDatabaseConfigured } from "@/db";
+import { applicationStatuses, statusLabels } from "@/lib/validators";
 
-export default function Home() {
+export default async function Home() {
   return (
     <main className="min-h-screen px-5 pb-32 pt-8 md:px-8 md:pb-12 md:pt-28">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
@@ -33,22 +44,104 @@ export default function Home() {
           />
         </section>
 
-        <section className="grid gap-4 sm:grid-cols-3">
-          {[
-            ["Total lamaran", "0"],
-            ["Dalam proses", "0"],
-            ["Diterima", "0"],
-          ].map(([label, value]) => (
-            <div
-              key={label}
-              className="rounded-2xl border border-slate-200 bg-surface p-5 dark:border-slate-700"
-            >
-              <p className="text-sm text-muted">{label}</p>
-              <p className="mt-2 text-3xl font-semibold">{value}</p>
-            </div>
-          ))}
-        </section>
+        <Suspense fallback={<DashboardLoading />}>
+          <DashboardData />
+        </Suspense>
       </div>
     </main>
   );
 }
+
+async function DashboardData() {
+  await connection();
+  const data = isDatabaseConfigured() ? await getDashboardData() : null;
+
+  if (data === null) return <DatabaseNotice />;
+  if (data.total === 0) return <EmptyDashboard />;
+  return <DashboardContent data={data} />;
+}
+
+function DashboardLoading() {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-surface p-8 text-sm text-muted dark:border-slate-700">
+      Memuat ringkasan lamaran...
+    </div>
+  );
+}
+
+function DashboardContent({
+  data,
+}: {
+  data: NonNullable<Awaited<ReturnType<typeof getDashboardData>>>;
+}) {
+  const counts = Object.fromEntries(
+    data.statuses.map(({ status, count }) => [status, count]),
+  ) as Partial<Record<(typeof applicationStatuses)[number], number>>;
+  const monthly = Array.from({ length: 12 }, (_, index) => {
+    const month = format(
+      startOfMonth(subMonths(new Date(), 11 - index)),
+      "yyyy-MM",
+    );
+    return {
+      month,
+      count: data.monthly.find((item) => item.month === month)?.count ?? 0,
+    };
+  });
+
+  return (
+    <>
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <StatCard label="Total lamaran" value={data.total} accent="bg-primary" />
+        {applicationStatuses.map((status) => (
+          <StatCard
+            key={status}
+            label={statusLabels[status]}
+            value={counts[status] ?? 0}
+            accent={statusAccent[status]}
+          />
+        ))}
+      </section>
+      <DashboardCharts
+        statuses={applicationStatuses.map((status) => ({
+          status,
+          count: counts[status] ?? 0,
+        }))}
+        monthly={monthly}
+      />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <RecentApplications applications={data.recentApplications} />
+        <UpcomingBanner application={data.upcoming} />
+      </div>
+    </>
+  );
+}
+
+function EmptyDashboard() {
+  return (
+    <section className="rounded-2xl border border-dashed border-slate-300 bg-surface p-8 text-center dark:border-slate-700 sm:p-12">
+      <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary-muted text-primary">
+        <BriefcaseBusiness size={26} />
+      </div>
+      <h2 className="mt-5 text-xl font-semibold">Belum ada data lamaran</h2>
+      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">
+        Tambahkan lamaran pertamamu untuk mulai melihat statistik, jadwal, dan
+        perkembangan proses rekrutmen di sini.
+      </p>
+      <Link
+        href="/lamaran/baru"
+        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:bg-primary-hover"
+      >
+        <Plus size={17} />
+        Tambah lamaran pertama
+      </Link>
+    </section>
+  );
+}
+
+const statusAccent: Record<(typeof applicationStatuses)[number], string> = {
+  dikirim: "bg-blue-500",
+  psikotes: "bg-violet-500",
+  wawancara: "bg-amber-500",
+  diterima: "bg-emerald-500",
+  ditolak: "bg-red-500",
+};

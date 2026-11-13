@@ -5,6 +5,8 @@ import { DatabaseNotice } from "@/components/database-notice";
 import { getApplications } from "@/actions/applications";
 import { isDatabaseConfigured } from "@/db";
 
+export const instant = false;
+
 export default async function ApplicationsPage() {
   const applications = isDatabaseConfigured() ? await getApplications() : null;
 
