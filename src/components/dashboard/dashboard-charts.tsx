@@ -1,7 +1,21 @@
 "use client";
 
 import { useReducedMotion } from "framer-motion";
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  PieSectorShapeProps,
+  ResponsiveContainer,
+  Sector,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { useState } from "react";
 import { applicationStatuses, statusLabels } from "@/lib/validators";
 
 type Status = (typeof applicationStatuses)[number];
@@ -29,6 +43,7 @@ export function DashboardCharts({
   monthly: MonthlyData[];
 }) {
   const shouldReduceMotion = useReducedMotion();
+  const [selectedStatus, setSelectedStatus] = useState<Status | null>(null);
   const animationDuration = shouldReduceMotion ? 0 : 700;
   const statusChartData = statuses.map((item) => ({
     ...item,
@@ -39,6 +54,12 @@ export function DashboardCharts({
     ...item,
     label: monthFormatter.format(new Date(`${item.month}-01T00:00:00+07:00`)),
   }));
+  const renderStatusSector = (props: PieSectorShapeProps) => (
+    <Sector
+      {...props}
+      outerRadius={props.outerRadius + (statusChartData[props.index]?.status === selectedStatus ? 6 : 0)}
+    />
+  );
 
   return (
     <div className="grid gap-6 lg:grid-cols-5">
@@ -46,7 +67,7 @@ export function DashboardCharts({
         <h2 className="font-semibold">Distribusi status</h2>
         <div className="mt-4 h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
+            <PieChart accessibilityLayer={false}>
               <Pie
                 data={statusChartData}
                 dataKey="count"
@@ -57,6 +78,8 @@ export function DashboardCharts({
                 outerRadius={92}
                 paddingAngle={3}
                 animationDuration={animationDuration}
+                shape={renderStatusSector}
+                onClick={(_, index) => setSelectedStatus(statusChartData[index]?.status ?? null)}
               >
                 {statusChartData.map((entry) => (
                   <Cell key={entry.status} fill={entry.fill} />
@@ -80,11 +103,15 @@ export function DashboardCharts({
         <h2 className="font-semibold">Lamaran per bulan</h2>
         <div className="mt-4 h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={monthlyChartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+            <BarChart
+              data={monthlyChartData}
+              margin={{ top: 8, right: 8, left: -20, bottom: 0 }}
+              accessibilityLayer={false}
+            >
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#CBD5E1" />
               <XAxis dataKey="label" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
               <YAxis allowDecimals={false} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
-              <Tooltip />
+              <Tooltip cursor={false} />
               <Bar
                 dataKey="count"
                 name="Lamaran"

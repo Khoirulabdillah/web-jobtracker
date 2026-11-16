@@ -46,3 +46,15 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+.recharts-wrapper:focus:not(:focus-visible),
+.recharts-wrapper .recharts-surface:focus:not(:focus-visible),
+.recharts-wrapper .recharts-sector:focus:not(:focus-visible),
+.recharts-wrapper .recharts-pie-sector:focus:not(:focus-visible),
+.recharts-wrapper .recharts-rectangle:focus:not(:focus-visible),
+.recharts-wrapper .recharts-layer:focus:not(:focus-visible),
+.recharts-wrapper svg:focus:not(:focus-visible),
+.recharts-wrapper g:focus:not(:focus-visible),
+.recharts-wrapper path:focus:not(:focus-visible) {
+  outline: none;
+}
