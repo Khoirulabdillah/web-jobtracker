@@ -39,7 +39,7 @@ export function DeleteButton({ id }: { id: string }) {
       </button>
       <dialog
         ref={dialogRef}
-        className="w-[min(28rem,calc(100vw-2rem))] rounded-2xl border border-slate-200 bg-surface p-0 text-foreground shadow-2xl backdrop:bg-slate-950/50 dark:border-slate-700"
+        className="fixed left-1/2 top-1/2 m-0 w-[min(28rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-slate-200 bg-surface p-0 text-foreground shadow-2xl backdrop:bg-slate-950/50 dark:border-slate-700"
       >
         <div className="p-6">
           <h2 className="text-lg font-semibold">Hapus lamaran?</h2>
