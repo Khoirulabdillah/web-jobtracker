@@ -36,6 +36,7 @@ export function ApplicationForm({
   const {
     register,
     handleSubmit,
+    reset,
     setError,
     setValue,
     formState: { errors },
@@ -78,6 +79,17 @@ export function ApplicationForm({
           ? "Lamaran berhasil ditambahkan."
           : "Lamaran berhasil diperbarui.",
       );
+      if (mode === "create") {
+        reset({
+          company: "",
+          position: "",
+          jobUrl: "",
+          appliedAt: getTodayJakarta(),
+          reminderAt: "",
+          status: "dikirim",
+          notes: "",
+        });
+      }
       router.push("/lamaran");
       router.refresh();
     });

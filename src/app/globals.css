@@ -39,6 +39,15 @@ body {
   font-family: var(--font-poppins), sans-serif;
 }
 
+select option {
+  background-color: var(--surface);
+  color: var(--foreground);
+}
+
+.dark select {
+  color-scheme: dark;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
