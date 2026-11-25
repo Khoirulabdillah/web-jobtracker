@@ -1,6 +1,7 @@
 import {
   date,
   index,
+  integer,
   pgEnum,
   pgTable,
   text,
@@ -20,6 +21,10 @@ export const applications = pgTable(
   "applications",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    applicationNumber: integer("application_number")
+      .generatedByDefaultAsIdentity()
+      .notNull()
+      .unique(),
     company: text("company").notNull(),
     position: text("position").notNull(),
     jobUrl: text("job_url"),

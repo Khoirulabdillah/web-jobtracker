@@ -1,34 +1,71 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ApplicationCard } from "@/components/applications/application-card";
 import { ApplicationFilters } from "@/components/applications/application-filters";
 import { DatabaseNotice } from "@/components/database-notice";
-import { getApplications } from "@/actions/applications";
+import { getApplicationsPage } from "@/actions/applications";
 import { isDatabaseConfigured } from "@/db";
 import {
   applicationStatuses,
   type ApplicationStatus,
 } from "@/lib/validators";
 import { Reveal, StaggerGroup, StaggerItem } from "@/components/motion/reveal";
+import { ApplicationPagination } from "@/components/applications/application-pagination";
 
 export const instant = false;
 
 export default async function ApplicationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; page?: string }>;
 }) {
   const params = await searchParams;
-  const query = params.q?.trim() ?? "";
-  const status = applicationStatuses.includes(
-    params.status as ApplicationStatus,
-  )
-    ? (params.status as ApplicationStatus)
+  const query = typeof params.q === "string" ? params.q.trim() : "";
+  const statusParam =
+    typeof params.status === "string" ? params.status.trim() : "";
+  const status = applicationStatuses.includes(statusParam as ApplicationStatus)
+    ? (statusParam as ApplicationStatus)
     : undefined;
-  const applications = isDatabaseConfigured()
-    ? await getApplications({ status, query })
+  const pageParam =
+    typeof params.page === "string" ? params.page.trim() : "";
+  const requestedPage =
+    /^\d+$/.test(pageParam) && pageParam !== ""
+      ? Number.parseInt(pageParam, 10)
+      : 1;
+  const page =
+    Number.isSafeInteger(requestedPage) && requestedPage > 0
+      ? requestedPage
+      : 1;
+  const result = isDatabaseConfigured()
+    ? await getApplicationsPage({ status, query, page, pageSize: 10 })
     : null;
+
+  if (result !== null) {
+    const canonicalParams = new URLSearchParams();
+    if (status) canonicalParams.set("status", status);
+    if (query) canonicalParams.set("q", query);
+    if (result.page > 1) canonicalParams.set("page", String(result.page));
+
+    const canonicalSearch = canonicalParams.toString();
+    const originalStatus = typeof params.status === "string" ? params.status : "";
+    const originalQuery = typeof params.q === "string" ? params.q : "";
+    const originalPage = typeof params.page === "string" ? params.page : "";
+    const canonicalStatus = status ?? "";
+    const canonicalQuery = query;
+    const canonicalPage = result.page > 1 ? String(result.page) : "";
+    const needsCanonicalUrl =
+      originalStatus !== canonicalStatus ||
+      originalQuery !== canonicalQuery ||
+      originalPage !== canonicalPage;
+
+    if (needsCanonicalUrl) {
+      redirect(canonicalSearch ? `/lamaran?${canonicalSearch}` : "/lamaran");
+    }
+  }
+
   const hasFilters = Boolean(status || query);
+  const applications = result?.applications ?? null;
 
   return (
     <main className="min-h-screen px-5 pb-32 pt-8 md:px-8 md:pb-12 md:pt-28">
@@ -54,7 +91,11 @@ export default async function ApplicationsPage({
 
         {applications !== null && (
           <Reveal>
-            <ApplicationFilters status={status} query={query} />
+            <ApplicationFilters
+              key={`${status ?? "all"}:${query}`}
+              status={status}
+              query={query}
+            />
           </Reveal>
         )}
 
@@ -80,13 +121,27 @@ export default async function ApplicationsPage({
             )}
           </div>
         ) : (
-          <StaggerGroup className="grid gap-4 md:grid-cols-2">
-            {applications.map((application) => (
-              <StaggerItem key={application.id}>
-                <ApplicationCard application={application} />
-              </StaggerItem>
-            ))}
-          </StaggerGroup>
+          <>
+            <StaggerGroup
+              key={`${status ?? "all"}:${query}:${result?.page ?? 1}`}
+              className="grid gap-4 md:grid-cols-2"
+            >
+              {applications.map((application) => (
+                <StaggerItem key={application.id}>
+                  <ApplicationCard application={application} />
+                </StaggerItem>
+              ))}
+            </StaggerGroup>
+            {result !== null && result.totalPages > 1 && (
+              <ApplicationPagination
+                status={status}
+                query={query}
+                page={result.page}
+                totalPages={result.totalPages}
+                total={result.total}
+              />
+            )}
+          </>
         )}
       </div>
     </main>

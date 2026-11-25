@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import type { Application } from "@/db/schema";
 import { formatDate, statusLabels, statusStyles } from "@/lib/validators";
+import { formatApplicationNumber } from "@/lib/utils";
 
 export function RecentApplications({
   applications,
@@ -24,7 +25,12 @@ export function RecentApplications({
             className="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0"
           >
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold">{application.position}</p>
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="shrink-0 font-mono text-xs font-semibold text-muted">
+                  {formatApplicationNumber(application.applicationNumber)}
+                </span>
+                <p className="truncate text-sm font-semibold">{application.position}</p>
+              </div>
               <p className="mt-1 truncate text-xs text-muted">
                 {application.company} · {formatDate(application.appliedAt)}
               </p>

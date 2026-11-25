@@ -62,6 +62,7 @@ Data yang diinput:
 |---|---|---|---|
 | Nama perusahaan | teks | Ya | |
 | Posisi yang dilamar | teks | Ya | |
+| Nomor lamaran | integer | Otomatis | Unik; format tampilan `#0001`, urutan berdasarkan waktu data lama dibackfill |
 | Link lowongan | URL | Tidak | Validasi format URL |
 | Tanggal melamar | tanggal | Ya | Default: hari ini |
 | Tanggal & jam pengingat | tanggal + jam | Tidak | Untuk jadwal psikotes/wawancara. Gunakan input `datetime-local` |
@@ -101,6 +102,7 @@ Setiap status punya badge warna yang konsisten di seluruh aplikasi.
 
 - Filter status: **Semua, Dikirim, Wawancara, Psikotes, Diterima, Ditolak**.
 - Pencarian berdasarkan **nama perusahaan** dan **posisi**.
+- Pencarian juga dapat menggunakan nomor lamaran, seperti `12` atau `#0012`.
 - Filter dan pencarian bisa dikombinasikan.
 - Pencarian memakai debounce (sekitar 300 ms).
 - Tampilkan empty state yang ramah jika tidak ada hasil.
@@ -136,7 +138,7 @@ Satu tabel. Tidak ada `user_id` karena aplikasi satu pengguna.
 
 ```ts
 // src/db/schema.ts
-import { pgTable, uuid, text, timestamp, pgEnum, date } from "drizzle-orm/pg-core";
+import { pgTable, uuid, integer, text, timestamp, pgEnum, date } from "drizzle-orm/pg-core";
 
 export const statusEnum = pgEnum("status", [
   "dikirim",
@@ -148,6 +150,10 @@ export const statusEnum = pgEnum("status", [
 
 export const applications = pgTable("applications", {
   id: uuid("id").defaultRandom().primaryKey(),
+  applicationNumber: integer("application_number")
+    .generatedByDefaultAsIdentity()
+    .notNull()
+    .unique(),
   company: text("company").notNull(),
   position: text("position").notNull(),
   jobUrl: text("job_url"),
@@ -163,8 +169,9 @@ export const applications = pgTable("applications", {
 Ketentuan:
 
 - `updatedAt` diperbarui setiap kali data diubah.
+- Setiap lamaran memiliki `application_number` integer unik berbasis identity; nomor lama ditentukan dengan urutan `created_at` terlama lalu `id`, dan tampilan memakai format `#0001`.
 - Tambahkan index pada `status` dan `appliedAt`.
-- Pencarian memakai `ILIKE` pada `company` dan `position`.
+- Pencarian memakai `ILIKE` pada `company` dan `position`, serta pencocokan nomor pada `application_number`.
 
 ---
 

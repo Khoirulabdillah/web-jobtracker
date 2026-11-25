@@ -131,6 +131,46 @@ function escapeLike(value: string) {
   return value.replace(/[\\%_]/g, "\\$&");
 }
 
+function buildApplicationConditions({
+  status,
+  query,
+}: {
+  status?: ApplicationStatus;
+  query?: string;
+}) {
+  const conditions = [];
+
+  if (status) {
+    conditions.push(eq(applications.status, status));
+  }
+
+  const normalizedQuery = query?.trim();
+  if (normalizedQuery) {
+    const searchPattern = `%${escapeLike(normalizedQuery)}%`;
+    const numericQuery = normalizedQuery.replace(/^#+/, "");
+    const applicationNumber =
+      /^\d+$/.test(numericQuery) &&
+      Number.isSafeInteger(Number(numericQuery)) &&
+      Number(numericQuery) <= 2147483647
+        ? Number(numericQuery)
+        : null;
+    const textAndOptionalNumberConditions = [
+      ilike(applications.company, searchPattern),
+      ilike(applications.position, searchPattern),
+    ];
+    if (applicationNumber !== null) {
+      textAndOptionalNumberConditions.push(
+        eq(applications.applicationNumber, applicationNumber),
+      );
+    }
+    conditions.push(
+      or(...textAndOptionalNumberConditions),
+    );
+  }
+
+  return conditions.length ? and(...conditions) : undefined;
+}
+
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -141,27 +181,50 @@ export async function getApplications({
   status?: ApplicationStatus;
   query?: string;
 } = {}) {
-  const conditions = [];
-
-  if (status) {
-    conditions.push(eq(applications.status, status));
-  }
-
-  if (query) {
-    const searchPattern = `%${escapeLike(query)}%`;
-    conditions.push(
-      or(
-        ilike(applications.company, searchPattern),
-        ilike(applications.position, searchPattern),
-      ),
-    );
-  }
-
+  const where = buildApplicationConditions({ status, query });
   return getDb()
     .select()
     .from(applications)
-    .where(conditions.length ? and(...conditions) : undefined)
+    .where(where)
     .orderBy(desc(applications.appliedAt), desc(applications.createdAt));
+}
+
+export async function getApplicationsPage({
+  status,
+  query,
+  page = 1,
+  pageSize = 10,
+}: {
+  status?: ApplicationStatus;
+  query?: string;
+  page?: number;
+  pageSize?: number;
+} = {}) {
+  const where = buildApplicationConditions({ status, query });
+  const safePageSize =
+    Number.isSafeInteger(pageSize) && pageSize > 0 ? pageSize : 10;
+  const countRows = await getDb()
+    .select({ count: count() })
+    .from(applications)
+    .where(where);
+  const total = Number(countRows[0]?.count ?? 0);
+  const totalPages = Math.max(1, Math.ceil(total / safePageSize));
+  const safePage = Number.isSafeInteger(page) && page > 0 ? page : 1;
+  const currentPage = Math.min(safePage, totalPages);
+  const rows = await getDb()
+    .select()
+    .from(applications)
+    .where(where)
+    .orderBy(desc(applications.appliedAt), desc(applications.createdAt))
+    .limit(safePageSize)
+    .offset((currentPage - 1) * safePageSize);
+
+  return {
+    applications: rows,
+    total,
+    page: currentPage,
+    totalPages,
+  };
 }
 
 export async function getApplicationById(id: string) {

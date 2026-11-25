@@ -2,7 +2,11 @@
 
 import { Search, X } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import {
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import {
   applicationStatuses,
@@ -19,30 +23,62 @@ export function ApplicationFilters({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [search, setSearch] = useState(query);
   const hasFilters = Boolean(status || query);
 
-  const updateUrl = useCallback((updates: { status?: string | null; q?: string | null }) => {
-    const params = new URLSearchParams();
-    const nextStatus = updates.status !== undefined ? updates.status : status;
-    const nextQuery = updates.q !== undefined ? updates.q : query;
+  const updateUrl = useCallback(
+    (updates: { status?: string | null; q?: string | null }) => {
+      const params = new URLSearchParams(searchParams.toString());
+      const nextStatus =
+        updates.status !== undefined
+          ? updates.status?.trim()
+          : searchParams.get("status")?.trim();
+      const nextQuery =
+        updates.q !== undefined
+          ? updates.q?.trim()
+          : searchParams.get("q")?.trim();
 
-    if (nextStatus) params.set("status", nextStatus);
-    if (nextQuery) params.set("q", nextQuery);
+      params.delete("page");
 
-    const queryString = params.toString();
-    router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
-      scroll: false,
-    });
-  }, [pathname, query, router, status]);
+      if (
+        nextStatus &&
+        applicationStatuses.includes(nextStatus as ApplicationStatus)
+      ) {
+        params.set("status", nextStatus);
+      } else {
+        params.delete("status");
+      }
+
+      if (nextQuery) {
+        params.set("q", nextQuery);
+      } else {
+        params.delete("q");
+      }
+
+      const queryString = params.toString();
+      const nextUrl = queryString ? `${pathname}?${queryString}` : pathname;
+      const currentUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+
+      if (nextUrl !== currentUrl) {
+        router.replace(nextUrl, { scroll: false });
+      }
+    },
+    [pathname, router, searchParams],
+  );
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
-      updateUrl({ q: search });
+      const nextQuery = search.trim();
+      const currentQuery = searchParams.get("q")?.trim() ?? "";
+
+      if (nextQuery !== currentQuery) {
+        updateUrl({ q: nextQuery });
+      }
     }, 300);
 
     return () => window.clearTimeout(timeout);
-  }, [search, updateUrl]);
+  }, [search, searchParams, updateUrl]);
 
   return (
     <section className="mb-6 rounded-2xl border border-slate-200 bg-surface p-4 dark:border-slate-700 sm:p-5">
@@ -68,7 +104,7 @@ export function ApplicationFilters({
           <select
             value={status ?? ""}
             onChange={(event) =>
-              updateUrl({ status: event.target.value })
+              updateUrl({ status: event.target.value, q: search })
             }
             className="w-full rounded-xl border border-slate-200 bg-transparent px-4 py-3 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15 dark:border-slate-600"
           >

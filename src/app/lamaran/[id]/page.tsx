@@ -19,6 +19,7 @@ import {
   statusStyles,
 } from "@/lib/validators";
 import { googleCalendarUrl } from "@/lib/calendar";
+import { formatApplicationNumber } from "@/lib/utils";
 
 export const instant = false;
 
@@ -58,6 +59,9 @@ export default async function ApplicationDetailPage({
                 className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusStyles[application.status]}`}
               >
                 {statusLabels[application.status]}
+              </span>
+              <span className="ml-2 inline-flex rounded-md bg-slate-100 px-2 py-1 font-mono text-xs font-semibold text-muted dark:bg-slate-800">
+                {formatApplicationNumber(application.applicationNumber)}
               </span>
               <h1 className="mt-4 text-3xl font-semibold tracking-tight">
                 {application.position}

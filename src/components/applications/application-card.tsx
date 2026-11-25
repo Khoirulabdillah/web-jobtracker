@@ -12,12 +12,16 @@ import {
   statusLabels,
   statusStyles,
 } from "@/lib/validators";
+import { formatApplicationNumber } from "@/lib/utils";
 
 export function ApplicationCard({ application }: { application: Application }) {
   return (
     <article className="motion-safe:active:scale-[0.99] motion-safe:transition-all motion-safe:duration-300 rounded-2xl border border-slate-200 bg-surface p-5 shadow-sm motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md dark:border-slate-700">
       <div className="flex items-start justify-between gap-4">
-        <div>
+        <div className="min-w-0">
+          <span className="mb-2 inline-flex rounded-md bg-slate-100 px-2 py-1 font-mono text-xs font-semibold text-muted dark:bg-slate-800">
+            {formatApplicationNumber(application.applicationNumber)}
+          </span>
           <h2 className="font-semibold">{application.position}</h2>
           <p className="mt-1 text-sm text-muted">{application.company}</p>
         </div>
